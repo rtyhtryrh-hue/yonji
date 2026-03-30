@@ -1,0 +1,46 @@
+name: CI Pipeline
+
+# Триггеры запуска
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+# Основная задача
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+  
+    steps:
+      # 1. Checkout кода
+      - name: Checkout repository
+        uses: actions/checkout@v4
+  
+      # 2. Установка Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+  
+      # 3. Установка зависимостей
+      - name: Install dependencies
+        run: npm ci
+  
+      # 4. Линтинг
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
+  
+      # 5. Запуск тестов
+      - name: Run tests
+        run: npm test
+  
+      # 6. Сохранение артефактов
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 7
